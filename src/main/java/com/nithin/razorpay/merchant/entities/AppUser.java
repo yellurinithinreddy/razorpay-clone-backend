@@ -19,7 +19,7 @@ public class AppUser {
     private Merchant merchant;
 
     @Column(nullable = false,length = 100,unique = true)
-    @Email
+    @Email(message = "please enter a valid email")
     private String email;
 
     @Column(nullable = false)
