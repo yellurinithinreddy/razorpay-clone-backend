@@ -3,7 +3,7 @@ spring:
     name: razorpay
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/razorpayDB}
-    username: ${DB_USER:postgres}
+    username: ${DB_USER: postgres}
     password: ${DB_PWD:Nithinreddy9491$}
   jpa:
     hibernate:
