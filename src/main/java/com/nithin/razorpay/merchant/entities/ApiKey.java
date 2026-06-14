@@ -2,12 +2,18 @@ package com.nithin.razorpay.merchant.entities;
 
 import com.nithin.razorpay.common.enums.Environment;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "api_key")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class ApiKey {
 
     @Id
@@ -18,15 +24,18 @@ public class ApiKey {
     @JoinColumn(name = "merchant_id",nullable = false)
     private Merchant merchant;
 
-    @Column(nullable = false, unique = true,length =50)
+    @Column(nullable = false, unique = true,length = 50)
     private String keyId;
 
+    @Column(nullable = false)
     private String keySecretHash;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Environment environment;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean enabled = true;
 
     private LocalDateTime lastUsedAt;

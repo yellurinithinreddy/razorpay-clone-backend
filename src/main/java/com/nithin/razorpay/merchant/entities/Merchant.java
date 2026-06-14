@@ -4,11 +4,17 @@ import com.nithin.razorpay.common.enums.BusinessType;
 import com.nithin.razorpay.common.enums.MerchantStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import lombok.*;
 
 import java.util.UUID;
 
 @Entity
 @Table(name = "merchant")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Merchant {
 
     @Id
@@ -22,7 +28,7 @@ public class Merchant {
     @Column(unique = true,nullable = false)
     private String email;
 
-    @Column(nullable = false,length = 20)
+    @Column(length = 20)
     private String contactNumber;
 
     @Enumerated(EnumType.STRING)
@@ -38,6 +44,7 @@ public class Merchant {
 
     @Column(nullable = false,length = 200)
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private MerchantStatus status = MerchantStatus.PENDING_KYC;
 
     @Column(length = 20)

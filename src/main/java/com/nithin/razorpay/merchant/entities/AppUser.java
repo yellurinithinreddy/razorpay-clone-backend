@@ -3,11 +3,17 @@ package com.nithin.razorpay.merchant.entities;
 import com.nithin.razorpay.common.enums.UserRole;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import lombok.*;
 
 import java.util.UUID;
 
 @Entity
 @Table(name = "app_user")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class AppUser {
 
     @Id
