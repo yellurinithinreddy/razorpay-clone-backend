@@ -3,6 +3,7 @@ package com.nithin.razorpay.payment.entities;
 import com.nithin.razorpay.common.entities.Money;
 import com.nithin.razorpay.common.enums.OrderStatus;
 import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -12,6 +13,11 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "order_record")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class OrderRecord {
 
     @Id
@@ -20,15 +26,20 @@ public class OrderRecord {
 
     //no FK cross service boundary
     @Column(nullable = false)
-    private UUID merchant_id;
+    private UUID merchantId;
 
     @Embedded
     private Money amount;
 
+    @Column(length = 100)
+    private String receipt;
+
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private OrderStatus orderStatus = OrderStatus.CREATED;
 
     @Column(nullable = false)
+    @Builder.Default
     private Integer attempts = 0;
 
     @Column(columnDefinition = "jsonb") // columnDefinition tells sql which datatype to use while triggering ddl command create

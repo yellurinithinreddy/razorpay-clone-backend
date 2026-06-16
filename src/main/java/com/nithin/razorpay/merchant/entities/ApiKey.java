@@ -27,8 +27,11 @@ public class ApiKey {
     @Column(nullable = false, unique = true,length = 50)
     private String keyId;
 
-    @Column(nullable = false)
+    @Column(nullable = false,length = 200)
     private String keySecretHash;
+
+    @Column(length = 200)
+    private String previousKeySecretHash;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
