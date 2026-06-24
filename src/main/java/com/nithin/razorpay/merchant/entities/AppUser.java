@@ -1,5 +1,6 @@
 package com.nithin.razorpay.merchant.entities;
 
+import com.nithin.razorpay.common.entities.BaseEntity;
 import com.nithin.razorpay.common.enums.UserRole;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -8,13 +9,17 @@ import lombok.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "app_user")
+@Table(name = "app_user",
+    indexes = {
+        @Index(name = "idx_app_user_merchant_id",columnList = "merchant_id")
+    }
+)
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AppUser {
+public class AppUser extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

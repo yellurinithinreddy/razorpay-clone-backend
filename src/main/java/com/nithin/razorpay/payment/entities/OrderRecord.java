@@ -1,5 +1,6 @@
 package com.nithin.razorpay.payment.entities;
 
+import com.nithin.razorpay.common.entities.BaseEntity;
 import com.nithin.razorpay.common.entities.Money;
 import com.nithin.razorpay.common.enums.OrderStatus;
 import jakarta.persistence.*;
@@ -12,13 +13,18 @@ import java.util.Map;
 import java.util.UUID;
 
 @Entity
-@Table(name = "order_record")
+@Table(name = "order_record",
+    indexes = {
+        @Index(name = "idx_order_id_merchant_id",columnList = "id, merchant_id"),
+        @Index(name = "idx_order_merchant_id",columnList = "merchant_id")
+    }
+)
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class OrderRecord {
+public class OrderRecord extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

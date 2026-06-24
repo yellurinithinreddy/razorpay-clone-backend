@@ -15,5 +15,5 @@ public interface ApiKeyService {
 
     void revoke(UUID merchantId, UUID keyId);
 
-    ApiKeyResponse rotate(UUID merchantId, UUID keyId);
+    ApiKeyResponse rotate(UUID merchantId, java.util.UUID keyId);
 }

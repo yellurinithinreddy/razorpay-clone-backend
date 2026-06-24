@@ -1,9 +1,14 @@
 package com.nithin.razorpay.payment.entities;
 
+import com.nithin.razorpay.common.entities.BaseEntity;
 import com.nithin.razorpay.common.entities.Money;
 import com.nithin.razorpay.common.enums.PaymentMethod;
 import com.nithin.razorpay.common.enums.PaymentStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -12,8 +17,17 @@ import java.util.Map;
 import java.util.UUID;
 
 @Entity
-@Table(name = "payment")
-public class Payment {
+@Table(name = "payment",
+    indexes = {
+        @Index(name = "idx_payment_order_id",columnList = "order_id"),
+        @Index(name = "idx_payment_merchant_id",columnList = "merchant_id")
+    }
+)
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class Payment extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -24,7 +38,7 @@ public class Payment {
     private OrderRecord order;
 
     @Column(nullable = false)
-    private UUID merchant_id;
+    private UUID merchantId;
 
     @Embedded
     private Money amount;

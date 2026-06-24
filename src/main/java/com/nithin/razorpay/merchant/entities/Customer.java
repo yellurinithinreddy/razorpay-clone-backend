@@ -1,14 +1,28 @@
 package com.nithin.razorpay.merchant.entities;
 
+import com.nithin.razorpay.common.entities.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "customer")
-public class Customer {
+@Table(name = "customer",
+    indexes = {
+        @Index(name = "idx_customer_merchant_id",columnList = "merchant_id"),
+        @Index(name = "idx_customer",columnList = "email")
+    }
+)
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class Customer extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

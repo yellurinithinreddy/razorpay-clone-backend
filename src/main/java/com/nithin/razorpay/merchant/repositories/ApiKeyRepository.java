@@ -9,5 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface ApiKeyRepository extends JpaRepository<ApiKey, UUID> {
-    List<ApiKey> findByMerchant_Id(UUID merchantId);
+    List<ApiKey> findByMerchant_Id(java.util.UUID merchantId);
 }
