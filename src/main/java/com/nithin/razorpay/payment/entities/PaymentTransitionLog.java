@@ -5,6 +5,7 @@ import com.nithin.razorpay.common.enums.PaymentActor;
 import com.nithin.razorpay.common.enums.PaymentEvent;
 import com.nithin.razorpay.common.enums.PaymentStatus;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,6 +16,11 @@ import java.util.UUID;
         @Index(name = "idx_payment_transition_log_payment_id",columnList = "payment_id")
     }
 )
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class PaymentTransitionLog extends BaseEntity {
 
     @Id
