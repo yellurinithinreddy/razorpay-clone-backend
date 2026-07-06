@@ -1,12 +1,18 @@
 package com.nithin.razorpay.vault.entities;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "vault_card")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class VaultCard {
 
     @Id

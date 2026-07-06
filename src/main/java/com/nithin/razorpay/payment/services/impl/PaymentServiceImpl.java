@@ -61,6 +61,8 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
         payment = paymentRepository.save(payment);
 
+        paymentTransitionService.apply(payment,PaymentEvent.AUTHORIZE_ATTEMPT);
+
         PaymentRequest paymentRequest = new PaymentRequest(payment.getId(),order.getId(),
                 merchantId,order.getAmount(),
                 request.method(),request.methodDetails());
@@ -79,6 +81,8 @@ public class PaymentServiceImpl implements PaymentService {
 
             }
             case PaymentResult.Success success -> {
+                log.info("Invalid state");
+                return null;
             }
         }
         payment = paymentRepository.save(payment);
