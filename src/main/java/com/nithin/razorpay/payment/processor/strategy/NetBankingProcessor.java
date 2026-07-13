@@ -12,7 +12,7 @@ public class NetBankingProcessor implements PaymentProcessor {
     public PaymentProcessorResponse charge(PaymentProcessorRequest request) {
 
         final String BANK_CODE_FAIL = "BANK_CODE_FAIL";
-        String bankCode = request.methodDetails()!=null ? request.methodDetails().get("BANK").toString() : null;
+        String bankCode = request.methodDetails()!=null ? request.methodDetails().get("bank").toString() : null;
 
         //simulation
         if(BANK_CODE_FAIL.equals(bankCode)){

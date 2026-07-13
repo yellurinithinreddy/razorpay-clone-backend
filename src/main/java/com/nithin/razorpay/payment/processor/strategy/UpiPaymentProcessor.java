@@ -11,7 +11,7 @@ public class UpiPaymentProcessor implements PaymentProcessor {
     @Override
     public PaymentProcessorResponse charge(PaymentProcessorRequest request) {
         final String VPA_CODE_FAIL = "fail@okaxis";
-        String bankCode = request.methodDetails()!=null ? request.methodDetails().get("VPA").toString() : null;
+        String bankCode = request.methodDetails()!=null ? request.methodDetails().get("vpa").toString() : null;
 
         //simulation
         if(VPA_CODE_FAIL.equals(bankCode)){

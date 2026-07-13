@@ -1,5 +1,6 @@
 package com.nithin.razorpay.payment.controllers;
 
+import com.nithin.razorpay.merchant.security.MerchantContext;
 import com.nithin.razorpay.payment.dto.request.CreateOrderRequest;
 import com.nithin.razorpay.payment.dto.response.OrderResponse;
 import com.nithin.razorpay.payment.dto.response.PaymentResponse;
@@ -21,25 +22,25 @@ import java.util.UUID;
 public class OrderController {
 
     private final OrderService orderService;
-    private final UUID merchantId = UUID.fromString("bf8826ef-f715-48fd-bb7f-ed5d3509b107");
+    private final MerchantContext merchantContext;
 
     @PostMapping
     public ResponseEntity<OrderResponse> create(@RequestBody @Valid CreateOrderRequest createOrderRequest){
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.create(merchantId,createOrderRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.create(merchantContext.getMerchantId(),createOrderRequest));
     }
 
-    @GetMapping("merchants/{merchantId}/order/{orderId}")
-    public ResponseEntity<OrderResponse> getById(@PathVariable UUID merchantId,@PathVariable UUID orderId){
-        return ResponseEntity.status(HttpStatus.OK).body(orderService.getById(merchantId,orderId));
+    @GetMapping("merchants/order/{orderId}")
+    public ResponseEntity<OrderResponse> getById(@PathVariable UUID orderId){
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.getById(merchantContext.getMerchantId(),orderId));
     }
 
-    @PostMapping("merchants/{merchantId}/order/{orderId}")
-    public ResponseEntity<OrderResponse> cancel(@PathVariable UUID merchantId,@PathVariable UUID orderId){
-        return ResponseEntity.status(HttpStatus.OK).body(orderService.cancel(merchantId,orderId));
+    @PostMapping("merchants/order/{orderId}")
+    public ResponseEntity<OrderResponse> cancel(@PathVariable UUID orderId){
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.cancel(merchantContext.getMerchantId(),orderId));
     }
 
-    @GetMapping("/payments/merchants/{merchantId}/order/{orderId}")
-    public ResponseEntity<List<PaymentResponse>> getAllPaymentsByOrder(@PathVariable UUID merchantId, @PathVariable UUID orderId){
-        return ResponseEntity.status(HttpStatus.OK).body(orderService.getAllPaymentsByOrder(merchantId,orderId));
+    @GetMapping("/payments/merchants/order/{orderId}")
+    public ResponseEntity<List<PaymentResponse>> getAllPaymentsByOrder(@PathVariable UUID orderId){
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.getAllPaymentsByOrder(merchantContext.getMerchantId(),orderId));
     }
 }

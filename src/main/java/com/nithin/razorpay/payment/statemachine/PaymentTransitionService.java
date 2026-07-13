@@ -16,11 +16,10 @@ import java.time.LocalDateTime;
 public class PaymentTransitionService {
 
     private final PaymentStateMachine paymentStateMachine;
-    private PaymentTransitionLogRepository paymentTransitionLogRepository;
+    private final PaymentTransitionLogRepository paymentTransitionLogRepository;
 
     public PaymentStatus apply(Payment payment, PaymentEvent event){
         PaymentStatus next = paymentStateMachine.transition(payment.getStatus(),event);
-        payment.setStatus(next);
 
         PaymentTransitionLog log = PaymentTransitionLog.builder()
                 .payment(payment)
@@ -30,6 +29,7 @@ public class PaymentTransitionService {
                 .actor(PaymentActor.SYSTEM) // TODO : get from security context holder
                 .event(event)
                 .build();
+        payment.setStatus(next);
 
         paymentTransitionLogRepository.save(log);
         return next;

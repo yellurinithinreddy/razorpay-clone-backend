@@ -14,12 +14,12 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
 master:
-  secret-key: kdfjvhbsdkjfbvsekjbfvskejfbelfkjsgkklndvkjgkhjfg
+  secret-key: m9K3vL7xQ2pN8sR4tY6uA1bC5dE0fG7hJ2kL9nP3qWs=
 
 payment:
   simulator:
-    poll-interval-ms: 5000
-    chaos-mode: NORMAL
+    poll-interval-seconds: 5000
+    chaos-mode: FAILURE
     method:
       CARD:
         min-delay-seconds: 2
@@ -34,4 +34,5 @@ payment:
         max-delay-seconds: 10
         success-rate: 80
 
-
+jwt:
+  secret-key: sdfkjghdskljhbfvkeshfdnzkljgfdskujlzjfdslbkjfes

@@ -13,6 +13,7 @@ import com.nithin.razorpay.merchant.repositories.MerchantRepository;
 import com.nithin.razorpay.merchant.services.ApiKeyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,8 @@ public class ApiKeyServiceImpl implements ApiKeyService {
     private final ApiKeyRepository apiKeyRepository;
     private final ApiKeyMapper apiKeyMapper;
 
+    private final PasswordEncoder passwordEncoder;
+
     @Override
     @Transactional
     public ApiKeyCreateResponse create(UUID merchantId, CreateApiKeyRequest createApiKeyRequest) {
@@ -41,7 +44,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
         ApiKey apiKey = ApiKey.builder()
                 .keyId(keyId)
-                .keySecretHash(rawSecret)
+                .keySecretHash(passwordEncoder.encode(rawSecret))
                 .environment(createApiKeyRequest.environment())
                 .merchant(merchant)
                 .build();
@@ -76,7 +79,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
         String newRawSecret = RandomizerUtil.randomBase64(40);
         apiKey.setPreviousKeySecretHash(apiKey.getKeySecretHash());
-        apiKey.setKeySecretHash(newRawSecret);
+        apiKey.setKeySecretHash(passwordEncoder.encode(newRawSecret));
         apiKey.setRotatedAt(LocalDateTime.now());
         apiKey.setGracePeriodExpiresAt(LocalDateTime.now().plusHours(24));
 
