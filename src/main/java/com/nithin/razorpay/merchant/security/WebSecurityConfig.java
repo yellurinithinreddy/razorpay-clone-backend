@@ -1,5 +1,6 @@
 package com.nithin.razorpay.merchant.security;
 
+import com.nithin.razorpay.common.idempotency.RedisIdempotencyFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,8 @@ public class WebSecurityConfig {
 
     private final ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
 
+    private final RedisIdempotencyFilter redisIdempotencyFilter;
+
     @Bean
     public SecurityFilterChain jwtChain(HttpSecurity http){
         return http
@@ -33,6 +36,7 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(redisIdempotencyFilter,JwtAuthenticationFilter.class)
                 .build();
     }
 
@@ -47,6 +51,7 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(apiKeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(redisIdempotencyFilter, ApiKeyAuthenticationFilter.class)
                 .build();
     }
 

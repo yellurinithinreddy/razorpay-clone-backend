@@ -2,6 +2,7 @@ package com.nithin.razorpay.merchant.services.impl;
 
 import com.nithin.razorpay.common.exceptions.ResourceNotFoundException;
 import com.nithin.razorpay.common.util.RandomizerUtil;
+import com.nithin.razorpay.merchant.cache.ApiKeyCache;
 import com.nithin.razorpay.merchant.dto.request.ApiKeyResponse;
 import com.nithin.razorpay.merchant.dto.request.CreateApiKeyRequest;
 import com.nithin.razorpay.merchant.dto.response.ApiKeyCreateResponse;
@@ -32,6 +33,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
     private final ApiKeyMapper apiKeyMapper;
 
     private final PasswordEncoder passwordEncoder;
+    private final ApiKeyCache apiKeyCache;
 
     @Override
     @Transactional
@@ -67,6 +69,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
                 .orElseThrow(() -> new ResourceNotFoundException("ApiKey",keyId));
 
         apiKey.setEnabled(false);
+        apiKeyCache.evict(apiKey.getKeyId());
 
     }
 
@@ -82,7 +85,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
         apiKey.setKeySecretHash(passwordEncoder.encode(newRawSecret));
         apiKey.setRotatedAt(LocalDateTime.now());
         apiKey.setGracePeriodExpiresAt(LocalDateTime.now().plusHours(24));
-
+        apiKeyCache.evict(apiKey.getKeyId());
         return new ApiKeyResponse(apiKey.getId(), apiKey.getKeyId(), apiKey.getEnvironment(), apiKey.isEnabled(),apiKey.getLastUsedAt(),null);
 
     }
