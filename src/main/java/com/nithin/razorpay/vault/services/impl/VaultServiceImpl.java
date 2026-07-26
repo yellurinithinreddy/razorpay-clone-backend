@@ -5,6 +5,7 @@ import com.nithin.razorpay.common.enums.CardBrand;
 import com.nithin.razorpay.common.enums.PaymentMethod;
 import com.nithin.razorpay.common.exceptions.ResourceNotFoundException;
 import com.nithin.razorpay.common.util.RandomizerUtil;
+import com.nithin.razorpay.merchant.repositories.CustomerRepository;
 import com.nithin.razorpay.payment.processor.PaymentProcessorRouter;
 import com.nithin.razorpay.payment.processor.dto.PaymentProcessorRequest;
 import com.nithin.razorpay.payment.processor.dto.PaymentProcessorResponse;
@@ -21,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.encrypt.BytesEncryptor;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -30,6 +32,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class VaultServiceImpl implements VaultService {
 
     private final VaultCardRepository vaultCardRepository;
@@ -38,6 +41,7 @@ public class VaultServiceImpl implements VaultService {
     private final PaymentProcessorRouter paymentProcessorRouter;
 
     @Override
+    @Transactional
     public TokenizeResponse tokenize(TokenizeRequest request, UUID merchantId) {
 
         String lastFour = request.pan().substring(request.pan().length()-4);
@@ -55,7 +59,8 @@ public class VaultServiceImpl implements VaultService {
                         .encryptedPan(encryptedPan)
                         .encryptedDek(encryptedDek)
                         .expiryMonth(request.expiryMonth().toString())
-                        .expiryMonth(request.expiryYear().toString())
+                        .expiryYear(request.expiryYear().toString())
+                        .lastFour(lastFour)
                         .brand(brand.name())
                         .build()
         );

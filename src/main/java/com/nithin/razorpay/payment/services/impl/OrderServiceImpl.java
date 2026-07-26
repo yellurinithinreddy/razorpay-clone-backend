@@ -4,6 +4,7 @@ import com.nithin.razorpay.common.enums.OrderStatus;
 import com.nithin.razorpay.common.exceptions.BusinessRuleViolationException;
 import com.nithin.razorpay.common.exceptions.DuplicateResourceException;
 import com.nithin.razorpay.common.exceptions.ResourceNotFoundException;
+import com.nithin.razorpay.merchant.services.CustomerService;
 import com.nithin.razorpay.payment.dto.request.CreateOrderRequest;
 import com.nithin.razorpay.payment.dto.response.OrderResponse;
 import com.nithin.razorpay.payment.dto.response.PaymentResponse;
@@ -34,6 +35,7 @@ public class OrderServiceImpl implements OrderService {
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
     private final OrderMapper orderMapper;
+    private final CustomerService customerService;
 
     @Value("${payment.order.default-order-expiry-minutes:30}")
     private int defaultOrderExpiryMinutes;
@@ -45,14 +47,24 @@ public class OrderServiceImpl implements OrderService {
             throw new DuplicateResourceException("ORDER_RECEIPT_DUPLICATE","Order with receipt already exists: "+createOrderRequest.receipt());
         }
 
+        UUID customer = null;
+
+        if(createOrderRequest.customer() != null){
+            customer = customerService.findOrCreate(merchantId,
+                    createOrderRequest.customer().email(),createOrderRequest.customer().name(),
+                    createOrderRequest.customer().phone());
+        }
+
         OrderRecord order = OrderRecord.builder()
                 .amount(createOrderRequest.amount())
                 .expiresAt(createOrderRequest.expiresAt() == null ? LocalDateTime.now().plusMinutes(defaultOrderExpiryMinutes) : createOrderRequest.expiresAt())
                 .receipt(createOrderRequest.receipt())
+                .customerId(customer)
                 .notes(createOrderRequest.notes())
                 .orderStatus(OrderStatus.CREATED)
                 .merchantId(merchantId)
                 .build();
+
 
         order = orderRepository.save(order);
 

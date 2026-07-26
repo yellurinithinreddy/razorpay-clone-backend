@@ -44,6 +44,9 @@ public class OrderRecord extends BaseEntity {
     @Builder.Default
     private OrderStatus orderStatus = OrderStatus.CREATED;
 
+    @Column(name = "customer_id")
+    private UUID customerId;
+
     @Column(nullable = false)
     @Builder.Default
     private Integer attempts = 0;

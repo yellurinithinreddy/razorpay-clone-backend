@@ -22,14 +22,13 @@ public class CardToken {
     @Column(length = 50,nullable = false,unique = true)
     private String token;
 
-    @ManyToOne(fetch = FetchType.LAZY,optional = false)
+    @ManyToOne(fetch = FetchType.EAGER,optional = false)
     @JoinColumn(nullable = false,name = "vault_card_id")
     private VaultCard vaultCard;
 
     @Column(nullable = false)
     private UUID merchant;
 
-    @Column(nullable = false)
     private UUID customer;
 
     private LocalDateTime revokedAt;
