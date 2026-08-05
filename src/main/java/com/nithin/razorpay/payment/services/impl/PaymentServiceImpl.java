@@ -1,9 +1,6 @@
 package com.nithin.razorpay.payment.services.impl;
 
-import com.nithin.razorpay.common.enums.OrderStatus;
-import com.nithin.razorpay.common.enums.PaymentEvent;
-import com.nithin.razorpay.common.enums.PaymentMethod;
-import com.nithin.razorpay.common.enums.PaymentStatus;
+import com.nithin.razorpay.common.enums.*;
 import com.nithin.razorpay.common.exceptions.BusinessRuleViolationException;
 import com.nithin.razorpay.common.exceptions.ResourceNotFoundException;
 import com.nithin.razorpay.payment.dto.request.PaymentInitRequest;
@@ -14,6 +11,7 @@ import com.nithin.razorpay.payment.gateway.PaymentGatewayRouter;
 import com.nithin.razorpay.payment.gateway.dto.PaymentRequest;
 import com.nithin.razorpay.payment.gateway.dto.PaymentResult;
 import com.nithin.razorpay.payment.mapper.PaymentMapper;
+import com.nithin.razorpay.payment.outbox.OutboxEventPublisher;
 import com.nithin.razorpay.payment.repositories.OrderRepository;
 import com.nithin.razorpay.payment.repositories.PaymentRepository;
 import com.nithin.razorpay.payment.services.PaymentService;
@@ -24,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -37,6 +36,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentMapper paymentMapper;
 
     private final PaymentTransitionService paymentTransitionService;
+    private final OutboxEventPublisher outboxEventPublisher;
 
     @Override
     @Transactional
@@ -92,6 +92,17 @@ public class PaymentServiceImpl implements PaymentService {
         payment = paymentRepository.save(payment);
         orderRepository.save(order);
 
+        outboxEventPublisher.publish(EventAggregateType.PAYMENT,payment.getId(),"PAYMENT_CREATED",
+                Map.of(
+                        "orderId",order.getId().toString(),
+                        "paymentId",payment.getId().toString(),
+                        "merchantId",merchantId.toString(),
+                        "paymentStatus",payment.getStatus().name(),
+                        "amountUnits",payment.getAmount().getAmountUnits(),
+                        "amountCurrency",payment.getAmount().getCurrency(),
+                        "paymentMethod",payment.getMethod().name()
+                )
+        );
 
         return paymentMapper.toResponse(payment);
     }
@@ -122,6 +133,18 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         payment = paymentRepository.save(payment);
+
+        outboxEventPublisher.publish(EventAggregateType.PAYMENT,payment.getId(),"PAYMENT_STATUS_CHANGED",
+                Map.of(
+                        "orderId",payment.getOrder().getId().toString(),
+                        "paymentId",payment.getId().toString(),
+                        "merchantId",merchantId.toString(),
+                        "paymentStatus",payment.getStatus().name(),
+                        "amountUnits",payment.getAmount().getAmountUnits(),
+                        "amountCurrency",payment.getAmount().getCurrency(),
+                        "paymentMethod",payment.getMethod().name()
+                )
+        );
 
         return paymentMapper.toResponse(payment);
     }
@@ -169,5 +192,16 @@ public class PaymentServiceImpl implements PaymentService {
 
         paymentRepository.save(payment);
         orderRepository.save(orderRecord);
+
+        outboxEventPublisher.publish(EventAggregateType.PAYMENT,payment.getId(),"PAYMENT_STATUS_CHANGED",
+                Map.of(
+                        "orderId",payment.getOrder().getId().toString(),
+                        "paymentId",payment.getId().toString(),
+                        "merchantId",payment.getMerchantId().toString(),
+                        "paymentStatus",payment.getStatus().name(),
+                        "amountUnits",payment.getAmount().getAmountUnits(),
+                        "amountCurrency",payment.getAmount().getCurrency()
+                )
+        );
     }
 }

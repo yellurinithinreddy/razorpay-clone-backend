@@ -2,9 +2,9 @@ spring:
   application:
     name: razorpay
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/razorpayDB}
-    username: ${DB_USER:postgres}
-    password: ${DB_PWD:Nithinreddy9491$}
+    url: ${DB_URL:jdbc:postgresql://localhost:5431/razorpay-db}
+    username: ${DB_USER:nithin}
+    password: ${DB_PWD:password}
   data:
     redis:
       host: ${REDIS_HOST:localhost}
@@ -12,11 +12,32 @@ spring:
       password: ${REDIS_PASSWORD:}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:29092}
+    producer:
+      acks: all
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        retries: 3
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: razorpay-monolith
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.trusted.packages: "com.nithin.razorpay.*"
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: java.util.LinkedHashMap
 
 master:
   secret-key: m9K3vL7xQ2pN8sR4tY6uA1bC5dE0fG7hJ2kL9nP3qWs=
@@ -42,9 +63,23 @@ payment:
 jwt:
   secret-key: sdfkjghdskljhbfvkeshfdnzkljgfdskujlzjfdslbkjfes
 
+threads:
+  virtual:
+    enabled: true
+
 app:
   rate-limit:
     method: fixed
     use-case:
       api-key:
         requests-per-minute: 2
+  kafka:
+    topics:
+      payment: payment.events
+      order: order.events
+      refund: refund.events
+      settlement: settlement.events
+  webhook:
+    delivery:
+      redis-key: "webhook-retry"
+      poll-batch-size: 100

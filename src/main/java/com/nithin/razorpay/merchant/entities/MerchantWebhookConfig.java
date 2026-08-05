@@ -2,10 +2,7 @@ package com.nithin.razorpay.merchant.entities;
 
 import com.nithin.razorpay.common.entities.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.UUID;
 
@@ -19,6 +16,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class MerchantWebhookConfig extends BaseEntity {
 
     @Id
@@ -33,7 +31,7 @@ public class MerchantWebhookConfig extends BaseEntity {
     private String targetUrl;
 
     @Column(length = 300)
-    private String webhookSecretHash;
+    private String webhookSecret;
 
     @Column(nullable = false)
     private Boolean enabled = true;
@@ -41,4 +39,15 @@ public class MerchantWebhookConfig extends BaseEntity {
     @Column(length = 255)
     private String eventTypes;
     //comma separated list of event types to subscribe to
+
+    public boolean isSubscribedTo(String eventType) {
+        if(eventTypes == null || eventTypes.isBlank()) return true;
+
+        for(String type:eventTypes.split(",")){
+            String trimmed = type.trim();
+            if(trimmed.equalsIgnoreCase(eventType) || trimmed.equalsIgnoreCase("ALL")) return true;
+        }
+
+        return false;
+    }
 }
