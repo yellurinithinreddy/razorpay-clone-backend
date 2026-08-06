@@ -9,15 +9,16 @@ import com.nithin.razorpay.operations.repositories.WebhookEventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.dao.DataAccessException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.CannotCreateTransactionException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -31,6 +32,7 @@ public class WebhookKafkaConsumer {
     private final ObjectMapper objectMapper;
     private final SignatureUtil signatureUtil;
     private final WebhookRetryQueue webhookRetryQueue;
+    private final DlqEventRecorder dlqEventRecorder;
 
     @KafkaListener(topics = {
           "${app.kafka.topics.payment:payment.events}",
@@ -42,6 +44,7 @@ public class WebhookKafkaConsumer {
 
         try{
 
+            log.info("envelope {}",record.value());
             Map<String,Object> envelope = record.value();
             Map<String,Object> data = (Map<String, Object>) envelope.get("data");
             String eventType = envelope.get("eventType").toString();
@@ -75,11 +78,17 @@ public class WebhookKafkaConsumer {
                 webhookEvent = webhookEventRepository.save(webhookEvent);
 
                 webhookRetryQueue.enqueue(webhookEvent.getId(), LocalDateTime.now());
+                log.info("created a webhook event with id: {}",webhookEvent.getId());
 
+                acknowledgment.acknowledge();
             }
-        }catch(Exception e){
-            log.error("webhook consumer failed to process the record , offset: {}",record.offset());
-//            TODO: handle exception while ack and retry
+        }catch(DataAccessException | CannotCreateTransactionException dbDown){
+            // If the db is down do not acknowledge
+            log.error("webhook consumer failed due to database down, Unable to process the record , offset: {}",record.offset(),dbDown);
+        }catch(Exception logicError){
+            log.error("webhook consumer failed due to logic error, Unable to process the record , offset: {}",record.offset(),logicError);
+            dlqEventRecorder.recordConsumerFailed(record,logicError.getMessage());
+            acknowledgment.acknowledge();
         }
 
     }

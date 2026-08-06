@@ -14,7 +14,7 @@ public class RandomizerUtil {
 
         byte[] buf = new byte[length];
         SECURE_RANDOM.nextBytes(buf);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(buf);
+        return Base64.getEncoder().withoutPadding().encodeToString(buf);
 
     }
 }

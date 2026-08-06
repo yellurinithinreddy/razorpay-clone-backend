@@ -2,6 +2,7 @@ package com.nithin.razorpay.operations.webhook;
 
 import com.nithin.razorpay.common.enums.WebhookEventStatus;
 import com.nithin.razorpay.operations.entities.WebhookEvent;
+import com.nithin.razorpay.operations.repositories.DlqEventRepository;
 import com.nithin.razorpay.operations.repositories.WebhookEventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,8 @@ public class WebhookDeliverExecutor {
     private final WebhookEventRepository webhookEventRepository;
     private final RestClient restClient;
     private final WebhookRetryQueue webhookRetryQueue;
+
+    private final DlqEventRecorder dlqEventRecorder;
 
     private final List<Duration> BACKOFF = List.of(
             Duration.ofMinutes(1), Duration.ofMinutes(5), Duration.ofMinutes(30),
@@ -71,6 +74,8 @@ public class WebhookDeliverExecutor {
             int statusCode = response.getStatusCode().value();
             event.setLastResponseCode(statusCode);
 
+
+
             if(response.getStatusCode().is2xxSuccessful()){
                 event.setDeliveredAt(LocalDateTime.now());
                 event.setStatus(WebhookEventStatus.DELIVERED);
@@ -81,7 +86,7 @@ public class WebhookDeliverExecutor {
 
             handleEventFailed(event,"HTTP"+response.getStatusCode());
         } catch(RestClientException e){
-            log.error("Webhook event of id {} and event type {} is Failed", webhookEventId, event.getEventType());
+            log.error("Webhook event of id {} and event type {} is Failed", webhookEventId, event.getEventType(),e);
             handleEventFailed(event,e.getMessage());
 
         }
@@ -92,10 +97,11 @@ public class WebhookDeliverExecutor {
     }
 
     private void handleEventFailed(WebhookEvent event, String errorMessage) {
+        log.error("Handling attempt failed for event {} with attempts count {} , next Retry At {}",event.getId(),event.getAttempts(),event.getNextRetryAt());
 
         if(event.getAttempts() >= MAX_ATTEMPTS){
             event.setStatus(WebhookEventStatus.DEAD);
-            // handle dlq
+            dlqEventRecorder.recordAfterAttemptsExhausted(event, errorMessage);
             return ;
         }
 
@@ -105,7 +111,6 @@ public class WebhookDeliverExecutor {
         event.setStatus(WebhookEventStatus.FAILED);
 
         webhookRetryQueue.enqueue(event.getId(), retryAt);
-
 
 
     }

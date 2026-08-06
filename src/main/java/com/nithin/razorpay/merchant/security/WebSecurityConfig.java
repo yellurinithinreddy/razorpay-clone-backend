@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
 
     private static final String[] JWT_ROUTES = {"/v1/auth/**","/v1/merchants/**","/v1/admin/**","/actuator/**"};
-    private static final String[] API_KEY_ROUTES = {"/v1/orders/**","/v1/payments/**","/v1/vault/**"};
+    private static final String[] API_KEY_ROUTES = {"/v1/orders/**","/v1/payments/**","/v1/vault/**" };
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private final ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
@@ -31,7 +31,7 @@ public class WebSecurityConfig {
         return http
                 .securityMatcher(JWT_ROUTES)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/v1/auth/signup","/v1/auth/login").permitAll()
+                        .requestMatchers("/v1/auth/signup","/v1/auth/login", "/webhook/**").permitAll()
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
